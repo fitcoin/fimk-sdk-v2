@@ -156,7 +156,7 @@ describe("Transaction builder", () => {
       })
   })
 
-  it("can generate json", () => {
+  /*it("can generate json", () => {
     return fimkSDK
       .payment("12345", "100.2")
       .publicMessage("Hello world")
@@ -184,7 +184,7 @@ describe("Transaction builder", () => {
           version: 1
         })
       })
-  })
+  })*/
 
   it("low level build transaction", () => {
     let builder = new Builder()
@@ -275,19 +275,27 @@ describe("Transaction builder", () => {
   })
 */
   it("can parse 'Asset Transfer' transaction", async done => {
+    const pubKeyHex = secretPhraseToPublicKey("abc")
     const txn = new Transaction(
         fimkSDK,
-        "12345",
+        pubKeyHex,
         new Builder()
             .isTestnet(fimkSDK.config.isTestnet)
             .attachment(new AssetTransfer().init(ASSET_1.ID, "100"))
             .amountHQT("0")
             .feeHQT(Fee.ASSET_TRANSFER_FEE)
-    )
-    const transaction = await txn.sign("qwerty")
+    ).privateMessage("Hello world")
+    const transaction = await txn.sign("secret")
     const bytesHex = transaction.getTransaction()!.getBytesAsHex()
     const parsedTxn = TransactionImpl.parse(bytesHex, fimkSDK.config.isTestnet)
     expect(parsedTxn).toBeInstanceOf(TransactionImpl)
+
+    const attachment2  = parsedTxn.getJSONObject().attachment
+    let decrypted = decryptMessage(attachment2.data, attachment2.nonce, pubKeyHex, "secret")
+    expect(decrypted).toEqual("Hello world")
+    decrypted = decryptMessage(attachment2.data, attachment2.nonce, secretPhraseToPublicKey("secret"), "abc")
+    expect(decrypted).toEqual("Hello world")
+
     done()
   })
 

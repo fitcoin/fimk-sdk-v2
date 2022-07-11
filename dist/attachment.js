@@ -16,7 +16,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ARBITRARY_MESSAGE = exports.ORDINARY_PAYMENT = exports.AccountControlEffectiveBalanceLeasing = exports.ColoredCoinsBidOrderCancellation = exports.ColoredCoinsAskOrderCancellation = exports.ColoredCoinsOrderCancellation = exports.ColoredCoinsBidOrderPlacement = exports.ColoredCoinsAskOrderPlacement = exports.ColoredCoinsOrderPlacement = exports.AssetTransfer = exports.AssetBase = exports.Message = exports.Payment = exports.EmptyAttachment = void 0;
+exports.ARBITRARY_MESSAGE = exports.ORDINARY_PAYMENT = exports.DigitalGoodsPurchaseAttachement = exports.AccountControlEffectiveBalanceLeasing = exports.ColoredCoinsBidOrderCancellation = exports.ColoredCoinsAskOrderCancellation = exports.ColoredCoinsOrderCancellation = exports.ColoredCoinsBidOrderPlacement = exports.ColoredCoinsAskOrderPlacement = exports.ColoredCoinsOrderPlacement = exports.AssetTransfer = exports.AssetBase = exports.Message = exports.Payment = exports.EmptyAttachment = void 0;
 /**
  * The MIT License (MIT)
  * Copyright (c) 2020 heatcrypto.
@@ -363,5 +363,60 @@ var AccountControlEffectiveBalanceLeasing = /** @class */ (function (_super) {
     return AccountControlEffectiveBalanceLeasing;
 }(appendix_1.AbstractAppendix));
 exports.AccountControlEffectiveBalanceLeasing = AccountControlEffectiveBalanceLeasing;
+var DigitalGoodsPurchaseAttachement = /** @class */ (function (_super) {
+    __extends(DigitalGoodsPurchaseAttachement, _super);
+    function DigitalGoodsPurchaseAttachement() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    DigitalGoodsPurchaseAttachement.prototype.init = function (goodsId, quantity, priceNQT, deliveryDeadlineTimestamp) {
+        this.goodsId = long_1.default.fromString(goodsId);
+        this.quantity = quantity;
+        this.priceNQT = long_1.default.fromString(priceNQT);
+        this.deliveryDeadlineTimestamp = deliveryDeadlineTimestamp;
+        return this;
+    };
+    DigitalGoodsPurchaseAttachement.prototype.getMySize = function () {
+        return 8 + 4 + 8 + 4;
+    };
+    DigitalGoodsPurchaseAttachement.prototype.parse = function (buffer) {
+        _super.prototype.parse.call(this, buffer);
+        this.goodsId = buffer.readInt64();
+        this.quantity = buffer.readInt32();
+        this.priceNQT = buffer.readInt64();
+        this.deliveryDeadlineTimestamp = buffer.readInt32();
+        return this;
+    };
+    DigitalGoodsPurchaseAttachement.prototype.putMyBytes = function (buffer) {
+        buffer.writeInt64(this.goodsId);
+        buffer.writeInt32(this.quantity);
+        buffer.writeInt64(this.priceNQT);
+        buffer.writeInt32(this.deliveryDeadlineTimestamp);
+    };
+    DigitalGoodsPurchaseAttachement.prototype.parseJSON = function (json) {
+        _super.prototype.parseJSON.call(this, json);
+        this.goodsId = long_1.default.fromString(json["goods"], true);
+        this.quantity = json["quantity"];
+        this.priceNQT = long_1.default.fromString(json["priceNQT"], false);
+        this.deliveryDeadlineTimestamp = json["deliveryDeadlineTimestamp"];
+        return this;
+    };
+    DigitalGoodsPurchaseAttachement.prototype.putMyJSON = function (json) {
+        json["goodsId"] = this.goodsId.toUnsigned().toString();
+        json["quantity"] = this.quantity.toString();
+        json["priceNQT"] = this.priceNQT.toString();
+        json["deliveryDeadlineTimestamp"] = this.deliveryDeadlineTimestamp.toString();
+    };
+    DigitalGoodsPurchaseAttachement.prototype.getAppendixName = function () {
+        return "DigitalGoodsPurchase";
+    };
+    DigitalGoodsPurchaseAttachement.prototype.getTransactionType = function () {
+        return transaction_type_1.DIGITAL_GOODS_PURCHASE_TRANSACTION_TYPE;
+    };
+    DigitalGoodsPurchaseAttachement.prototype.getFee = function () {
+        return fee_1.Fee.DIGITAL_GOODS_PURCHASE_FEE;
+    };
+    return DigitalGoodsPurchaseAttachement;
+}(appendix_1.AbstractAppendix));
+exports.DigitalGoodsPurchaseAttachement = DigitalGoodsPurchaseAttachement;
 exports.ORDINARY_PAYMENT = new Payment();
 exports.ARBITRARY_MESSAGE = new Message();
